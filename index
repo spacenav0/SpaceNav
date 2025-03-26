@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceNav - Juego de Misiones Espaciales para Ganar Dinero</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+    :root {
+        --primary: #00f0ff;
+        --primary-dark: #0066cc;
+        --primary-light: #00e5ff;
+        --secondary: #ff2d75;
+        --accent: #00f0ff;
+        --dark: #0a0a20;
+        --darker: #050510;
+        --light: #e0f7fa;
+        --success: #00e676;
+        --danger: #ff3d00;
+        
+        --neon-glow: 0 0 10px rgba(0, 240, 255, 0.7);
+        --neon-glow-accent: 0 0 15px rgba(0, 240, 255, 0.7);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Space Mono', monospace;
+        background-color: var(--darker);
+        color: var(--light);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-image: 
+            radial-gradient(circle at 20% 30%, rgba(0, 102, 204, 0.1) 0%, transparent 25%),
+            radial-gradient(circle at 80% 70%, rgba(255, 45, 117, 0.1) 0%, transparent 25%),
+            url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="white" opacity="0.3"/></svg>');
+        overflow-x: hidden;
+    }
+
+    /* Navbar */
+    .navbar {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background-color: rgba(10, 10, 32, 0.95);
+        backdrop-filter: blur(10px);
+        z-index: 1000;
+        border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .navbar-brand {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 700;
+        color: var(--primary);
+        text-decoration: none;
+        font-size: clamp(1.5rem, 4vw, 1.8rem);
+        letter-spacing: 1px;
+        text-shadow: var(--neon-glow);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .custom-icon {
+        width: 30px;
+        height: 30px;
+        background-image: url('https://cdn-icons-png.flaticon.com/512/901/901824.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.7));
+        animation: pulse 2s infinite, float 3s ease-in-out infinite;
+    }
+
+    .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: var(--primary);
+        font-size: 1.5rem;
+        cursor: pointer;
+        z-index: 1001;
+    }
+
+    .navbar-menu {
+        display: flex;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-menu a {
+        color: var(--light);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 500;
+    }
+
+    .navbar-menu a:hover {
+        color: var(--primary);
+        text-shadow: var(--neon-glow);
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-family: 'Orbitron', sans-serif;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .btn-primary {
+        background: linear-gradient(to right, var(--primary), var(--primary-dark));
+        color: var(--darker);
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(0, 240, 255, 0.7);
+    }
+
+    .btn-accent {
+        background: linear-gradient(to right, var(--primary), var(--primary-dark));
+        color: var(--darker);
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+    }
+
+    .btn-accent:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(0, 240, 255, 0.7);
+        background: linear-gradient(to right, var(--primary-light), var(--primary));
+    }
+
+    .btn-secondary {
+        background: linear-gradient(to right, var(--secondary), #c2185b);
+        color: var(--light);
+        box-shadow: 0 0 15px rgba(255, 45, 117, 0.5);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(255, 45, 117, 0.7);
+    }
+
+    /* Hero Section */
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding-top: 80px;
+    }
+
+    .hero-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-text {
+        animation: fadeInLeft 1s ease;
+    }
+
+    .hero-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        margin-bottom: 1.5rem;
+        color: var(--primary);
+        text-shadow: var(--neon-glow);
+        line-height: 1.2;
+    }
+
+    .hero-title span {
+        color: var(--primary);
+        text-shadow: var(--neon-glow-accent);
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        margin-bottom: 2rem;
+        opacity: 0.9;
+        line-height: 1.6;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .hero-image {
+        position: relative;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .hero-image img {
+        max-width: 100%;
+        height: auto;
+        filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.5));
+    }
+
+    /* Sección "Cómo Funciona" */
+    .features-section {
+        padding: 5rem 1rem;
+        background: rgba(5, 5, 16, 0.7);
+        position: relative;
+    }
+
+    .features-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    .feature-card {
+        background: rgba(10, 10, 32, 0.9);
+        border-radius: 15px;
+        padding: 2rem;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 240, 255, 0.4);
+        border-color: var(--primary);
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .feature-img {
+        width: 100%;
+        height: auto;
+        z-index: 2;
+        filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.7));
+    }
+
+    .feature-icon i {
+        font-size: 2.5rem;
+        color: var(--primary);
+        z-index: 2;
+        text-shadow: var(--neon-glow);
+    }
+
+    .icon-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 240, 255, 0.1);
+        border-radius: 50%;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        animation: pulse 3s infinite;
+    }
+
+    .feature-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary);
+        text-align: center;
+        font-weight: 500;
+    }
+
+    .feature-text {
+        opacity: 0.9;
+        line-height: 1.6;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .feature-number {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 240, 255, 0.1);
+        color: var(--primary);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: bold;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    /* Sección de estadísticas */
+    .stats-section {
+        padding: 3rem 0;
+        background: radial-gradient(circle at center, rgba(0, 102, 204, 0.1), transparent 70%);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .stat-card {
+        background: rgba(10, 10, 32, 0.8);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(0, 240, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 240, 255, 0.2);
+    }
+
+    .stat-number {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 2.2rem;
+        font-weight: bold;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+        text-shadow: var(--neon-glow);
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        opacity: 0.8;
+    }
+
+    /* Sección de gráfica animada */
+    .graph-section {
+        padding: 5rem 1rem;
+        background: rgba(5, 5, 16, 0.7);
+        position: relative;
+    }
+
+    .graph-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: rgba(10, 10, 32, 0.8);
+        border-radius: 15px;
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .graph-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        margin-bottom: 2rem;
+        color: var(--primary);
+        text-shadow: var(--neon-glow);
+        text-align: center;
+    }
+
+    .graph-subtitle {
+        text-align: center;
+        margin-bottom: 2rem;
+        opacity: 0.8;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .graph-wrapper {
+        width: 100%;
+        height: 400px;
+        position: relative;
+        margin-top: 2rem;
+    }
+
+    .graph-line {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: rgba(0, 240, 255, 0.3);
+    }
+
+    .graph-path {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        fill: none;
+        stroke: var(--primary);
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5));
+    }
+
+    .graph-point {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: var(--primary);
+        border-radius: 50%;
+        transform: translate(-50%, 50%);
+        box-shadow: 0 0 15px var(--primary);
+        z-index: 2;
+    }
+
+    .graph-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+        padding: 0 1rem;
+    }
+
+    .graph-label {
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+
+    .graph-values {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .graph-value {
+        position: relative;
+        width: 100%;
+        height: 1px;
+        background: rgba(0, 240, 255, 0.1);
+    }
+
+    .graph-value::after {
+        content: attr(data-value);
+        position: absolute;
+        right: -40px;
+        top: -8px;
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+
+    /* Sección "Quiénes Somos" */
+    .about-section {
+        padding: 3rem 0;
+        background: radial-gradient(circle at center, rgba(255, 45, 117, 0.1), transparent 70%);
+    }
+
+    .about-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .about-image {
+        position: relative;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .about-image img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 15px;
+        box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+    }
+
+    .about-text h2 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        margin-bottom: 1.5rem;
+        color: var(--primary);
+        text-shadow: var(--neon-glow);
+    }
+
+    .about-text p {
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    /* Footer */
+    .footer {
+        background: rgba(5, 5, 16, 0.95);
+        padding: 2rem 0;
+        border-top: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .footer-logo {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 700;
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+        text-shadow: var(--neon-glow);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .footer-text {
+        opacity: 0.7;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .footer-links h3 {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--primary);
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .footer-links ul {
+        list-style: none;
+    }
+
+    .footer-links li {
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-links a {
+        color: var(--light);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .footer-links a:hover {
+        color: var(--primary);
+        text-shadow: var(--neon-glow);
+    }
+
+    .footer-social {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .footer-social a {
+        color: var(--light);
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .footer-social a:hover {
+        color: var(--primary);
+        transform: translateY(-3px);
+    }
+
+    .footer-bottom {
+        text-align: center;
+        padding-top: 1.5rem;
+        margin-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        opacity: 0.7;
+        font-size: 0.8rem;
+    }
+
+    /* Decoraciones espaciales */
+    .space-particle {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    /* Animaciones */
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+
+    @keyframes float-particle {
+        0%, 100% { transform: translateY(0) translateX(0); opacity: 0.8; }
+        25% { transform: translateY(-10px) translateX(-5px); opacity: 1; }
+        50% { transform: translateY(0) translateX(-10px); opacity: 0.6; }
+        75% { transform: translateY(10px) translateX(-5px); opacity: 0.9; }
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.8; }
+    }
+
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .hero-content {
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 3rem;
+        }
+
+        .hero-buttons {
+            justify-content: center;
+        }
+
+        .hero-image {
+            max-width: 80%;
+            margin: 0 auto;
+        }
+
+        .about-container {
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 2rem;
+        }
+
+        .about-image {
+            order: -1;
+            margin-bottom: 2rem;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .menu-toggle {
+            display: block;
+        }
+
+        .navbar-menu {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 32, 0.98);
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            gap: 1.5rem;
+            clip-path: circle(0px at 90% -10%);
+            transition: clip-path 0.5s ease;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+        }
+
+        .navbar-menu.active {
+            clip-path: circle(150% at 90% -10%);
+        }
+
+        .navbar-menu a {
+            font-size: 1.1rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .feature-card {
+            padding: 1.5rem;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .graph-wrapper {
+            height: 300px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .footer-container {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .custom-icon {
+            width: 25px;
+            height: 25px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .navbar {
+            padding: 1rem;
+        }
+
+        .hero-content {
+            padding: 1rem;
+        }
+
+        .hero-buttons {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .graph-wrapper {
+            height: 250px;
+        }
+
+        .graph-point {
+            width: 10px;
+            height: 10px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .footer-container {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+
+        .footer-links ul {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .footer-social {
+            justify-content: center;
+        }
+
+        .custom-icon {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .hero-title {
+            font-size: 1.8rem;
+        }
+
+        .hero-subtitle {
+            font-size: 0.95rem;
+        }
+
+        .graph-title {
+            font-size: 1.6rem;
+        }
+
+        .graph-subtitle {
+            font-size: 0.9rem;
+        }
+
+        .stats-grid {
+            gap: 1rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+        }
+    }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">
+            <div class="custom-icon"></div> SpaceNav
+        </a>
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="navbar-menu" id="navbarMenu">
+            <a href="#features"><i class="fas fa-star"></i> Características</a>
+            <a href="#about"><i class="fas fa-users"></i> Quiénes Somos</a>
+            <a href="#graph"><i class="fas fa-chart-line"></i> Rendimiento</a>
+            <a href="#" class="btn btn-accent" style="padding: 0.5rem 1rem;"><i class="fas fa-play"></i> Jugar Online</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title animate__animated animate__fadeInDown">Embárcate en <span>misiones espaciales</span> y gana dinero real</h1>
+                <p class="hero-subtitle animate__animated animate__fadeIn animate__delay-1s">SpaceNav es el primer juego de misiones espaciales donde puedes multiplicar tus ganancias x2 en emocionantes aventuras intergalácticas. ¡Únete a miles de jugadores!</p>
+                <div class="hero-buttons animate__animated animate__fadeInUp animate__delay-1s">
+                    <a href="#" class="btn btn-accent"><i class="fas fa-download"></i> Descargar App</a>
+                    <a href="#" class="btn btn-secondary"><i class="fas fa-play"></i> Jugar Online</a>
+                </div>
+            </div>
+            <div class="hero-image animate__animated animate__fadeInRight">
+                <img src="https://cdn-icons-png.flaticon.com/512/901/901824.png" alt="Nave espacial SpaceNav" loading="lazy">
+            </div>
+        </div>
+        
+        <!-- Partículas espaciales -->
+        <div id="particles"></div>
+    </section>
+
+    <!-- Sección "Cómo Funciona" -->
+    <section class="features-section" id="features">
+        <div class="features-container">
+            <h2 class="section-title animate__animated animate__fadeIn">Cómo Funciona SpaceNav</h2>
+            
+            <div class="features-grid">
+                <!-- Tarjeta 1 -->
+                <div class="feature-card animate__animated animate__fadeInUp">
+                    <div class="feature-icon">
+                        <img src="https://cdn-icons-png.flaticon.com/512/901/901824.png" alt="Misiones" class="feature-img">
+                        <div class="icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">Misiones Espaciales</h3>
+                    <p class="feature-text">Embárcate en emocionantes misiones con diferentes niveles de dificultad y recompensas. Cada misión te da la oportunidad de multiplicar tu inversión x2.</p>
+                    <div class="feature-number">1</div>
+                </div>
+                
+                <!-- Tarjeta 2 -->
+                <div class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                    <div class="feature-icon">
+                        <i class="fas fa-coins"></i>
+                        <div class="icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">Gana Dinero Real</h3>
+                    <p class="feature-text">Convierte tus puntos en dinero real que puedes retirar a través de diversos métodos de pago. Cada misión exitosa te acerca a tu próxima recompensa.</p>
+                    <div class="feature-number">2</div>
+                </div>
+                
+                <!-- Tarjeta 3 -->
+                <div class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                        <div class="icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">Comunidad Activa</h3>
+                    <p class="feature-text">Únete a miles de jugadores. Compara tus puntuaciones, forma alianzas y participa en torneos especiales con premios mayores.</p>
+                    <div class="feature-number">3</div>
+                </div>
+                
+                <!-- Tarjeta 4 -->
+                <div class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.6s">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                        <div class="icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">Multiplicadores</h3>
+                    <p class="feature-text">Algunas misiones incluyen multiplicadores aleatorios que pueden aumentar tus ganancias. ¡Pero cuidado con los riesgos!</p>
+                    <div class="feature-number">4</div>
+                </div>
+                
+                <!-- Tarjeta 5 -->
+                <div class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 0.8s">
+                    <div class="feature-icon">
+                        <i class="fas fa-gift"></i>
+                        <div class="icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">Bonos Diarios</h3>
+                    <p class="feature-text">Recibe bonos de bienvenida y recompensas diarias por jugar. Mientras más juegues, mejores serán tus recompensas.</p>
+                    <div class="feature-number">5</div>
+                </div>
+                
+                <!-- Tarjeta 6 -->
+                <div class="feature-card animate__animated animate__fadeInUp" style="animation-delay: 1s">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                        <div class="icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">Seguridad Garantizada</h3>
+                    <p class="feature-text">Tus transacciones y datos están protegidos con tecnología de encriptación avanzada para tu tranquilidad.</p>
+                    <div class="feature-number">6</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de estadísticas -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card animate__animated animate__fadeInUp">
+                <div class="stat-number" id="activeUsers">25,000+</div>
+                <div class="stat-label">Usuarios Activos</div>
+            </div>
+            
+            <div class="stat-card animate__animated animate__fadeInUp animate__delay-1s">
+                <div class="stat-number" id="totalMissions">1,200,000+</div>
+                <div class="stat-label">Misiones Completadas</div>
+            </div>
+            
+            <div class="stat-card animate__animated animate__fadeInUp animate__delay-2s">
+                <div class="stat-number" id="totalPayouts">$500,000+</div>
+                <div class="stat-label">En Pagos Realizados</div>
+            </div>
+            
+            <div class="stat-card animate__animated animate__fadeInUp animate__delay-3s">
+                <div class="stat-number" id="appDownloads">100,000+</div>
+                <div class="stat-label">Descargas de la App</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de gráfica animada -->
+    <section class="graph-section" id="graph">
+        <div class="graph-container">
+            <h2 class="graph-title animate__animated animate__fadeIn">Rendimiento de Misiones</h2>
+            <p class="graph-subtitle animate__animated animate__fadeIn animate__delay-1s">
+                Observa cómo varían las recompensas en nuestras misiones espaciales más populares.
+                Los puntos representan las ganancias máximas alcanzadas por nuestros jugadores.
+            </p>
+            
+            <div class="graph-wrapper">
+                <div class="graph-values">
+                    <div class="graph-value" data-value="$500"></div>
+                    <div class="graph-value" data-value="$400"></div>
+                    <div class="graph-value" data-value="$300"></div>
+                    <div class="graph-value" data-value="$200"></div>
+                    <div class="graph-value" data-value="$100"></div>
+                    <div class="graph-line"></div>
+                </div>
+                
+                <svg class="graph-path" viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0,250 C100,150 200,350 300,250 C400,150 500,350 600,250 C700,150 800,350 900,250 L1000,250" />
+                </svg>
+                
+                <!-- Puntos en la gráfica -->
+                <div class="graph-point" style="left: 10%; bottom: 60%;"></div>
+                <div class="graph-point" style="left: 30%; bottom: 30%;"></div>
+                <div class="graph-point" style="left: 50%; bottom: 70%;"></div>
+                <div class="graph-point" style="left: 70%; bottom: 40%;"></div>
+                <div class="graph-point" style="left: 90%; bottom: 90%;"></div>
+            </div>
+            
+            <div class="graph-labels">
+                <div class="graph-label">Misión Alfa</div>
+                <div class="graph-label">Misión Beta</div>
+                <div class="graph-label">Misión Gamma</div>
+                <div class="graph-label">Misión Delta</div>
+                <div class="graph-label">Misión Épsilon</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección "Quiénes Somos" -->
+    <section class="about-section" id="about">
+        <div class="about-container">
+            <div class="about-text animate__animated animate__fadeInLeft">
+                <h2>Quiénes Somos</h2>
+                <p>SpaceNav nació en 2023 con la visión de combinar la emoción de los juegos espaciales con la posibilidad real de ganar premios. Nuestro equipo de desarrolladores y diseñadores apasionados por los juegos y las finanzas creó esta plataforma única.</p>
+                <p>Nos enorgullece ofrecer un juego justo y transparente, donde cada misión es una nueva oportunidad para demostrar tus habilidades y aumentar tus ganancias.</p>
+                <p>¡Únete a nuestra comunidad galáctica y comienza tu viaje hacia recompensas interestelares!</p>
+                
+                <div style="margin-top: 2rem;">
+                    <a href="#" class="btn btn-accent"><i class="fas fa-download"></i> Descargar Ahora</a>
+                </div>
+            </div>
+            
+            <div class="about-image animate__animated animate__fadeInRight">
+                <img src="https://cdn.pixabay.com/photo/2018/08/14/13/23/ocean-3605547_1280.jpg" alt="Equipo SpaceNav" loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <a href="#" class="footer-logo">
+                    <div class="custom-icon"></div> SpaceNav
+                </a>
+                <p class="footer-text">El primer juego de misiones espaciales donde puedes ganar dinero real. ¡Embárcate en esta aventura galáctica!</p>
+                
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                </div>
+            </div>
+            
+           
+            <div class="footer-col">
+                <div class="footer-links">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Términos y Condiciones</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Política de Privacidad</a></li>
+                        
+                    </ul>
+                </div>
+            </div>
+            
+           
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2023 SpaceNav. Todos los derechos reservados. | Juego para mayores de 18 años.</p>
+        </div>
+    </footer>
+
+    <script>
+    // Menú móvil
+    const menuToggle = document.getElementById('menuToggle');
+    const navbarMenu = document.getElementById('navbarMenu');
+    
+    menuToggle.addEventListener('click', () => {
+        navbarMenu.classList.toggle('active');
+        menuToggle.innerHTML = navbarMenu.classList.contains('active') ? 
+            '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+    });
+
+    // Cerrar menú al hacer clic en un enlace
+    document.querySelectorAll('.navbar-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            navbarMenu.classList.remove('active');
+            menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+        });
+    });
+
+    // Animación de contadores
+    function animateCounter(element, target, duration = 2000) {
+        const start = 0;
+        const increment = target / (duration / 16);
+        let current = start;
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                clearInterval(timer);
+                current = target;
+            }
+            
+            if (element.id === 'totalPayouts') {
+                element.textContent = '$' + Math.floor(current).toLocaleString() + '+';
+            } else {
+                element.textContent = Math.floor(current).toLocaleString() + '+';
+            }
+        }, 16);
+    }
+
+    // Observador de intersección para animaciones
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                if (entry.target.id === 'activeUsers') {
+                    animateCounter(entry.target, 25000);
+                } else if (entry.target.id === 'totalMissions') {
+                    animateCounter(entry.target, 1200000);
+                } else if (entry.target.id === 'totalPayouts') {
+                    animateCounter(entry.target, 500000);
+                } else if (entry.target.id === 'appDownloads') {
+                    animateCounter(entry.target, 100000);
+                }
+                
+                entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    // Observar elementos de estadísticas
+    document.querySelectorAll('.stat-number').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Crear partículas espaciales (solo en dispositivos no móviles)
+    function createParticles() {
+        // No crear partículas en dispositivos móviles para mejor rendimiento
+        if (window.innerWidth <= 768) return;
+        
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 30;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'space-particle';
+            
+            // Tamaño aleatorio entre 1px y 3px
+            const size = Math.random() * 2 + 1;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Posición aleatoria
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.top = `${Math.random() * 100}%`;
+            
+            // Opacidad aleatoria
+            particle.style.opacity = Math.random() * 0.5 + 0.1;
+            
+            // Animación aleatoria
+            const duration = Math.random() * 10 + 5;
+            const delay = Math.random() * 5;
+            particle.style.animation = `float-particle ${duration}s ${delay}s infinite ease-in-out`;
+            
+            particlesContainer.appendChild(particle);
+        }
+    }
+
+    // Animación de la gráfica
+    function animateGraph() {
+        const path = document.querySelector('.graph-path path');
+        const length = path.getTotalLength();
+        
+        // Inicializar la gráfica
+        path.style.strokeDasharray = length;
+        path.style.strokeDashoffset = length;
+        
+        // Animación de dibujo
+        path.style.transition = 'stroke-dashoffset 2s ease-in-out';
+        path.style.strokeDashoffset = '0';
+        
+        // Animación de puntos
+        const points = document.querySelectorAll('.graph-point');
+        points.forEach((point, index) => {
+            setTimeout(() => {
+                point.style.transition = 'all 0.5s ease-out';
+                point.style.transform = 'translate(-50%, 50%) scale(1.5)';
+                point.style.background = 'var(--accent)';
+                
+                setTimeout(() => {
+                    point.style.transform = 'translate(-50%, 50%) scale(1)';
+                    point.style.background = 'var(--primary)';
+                }, 500);
+            }, index * 400 + 1000);
+        });
+        
+        // Efecto de onda continua
+        setInterval(() => {
+            const randomPoint = Math.floor(Math.random() * points.length);
+            points[randomPoint].style.transform = 'translate(-50%, 50%) scale(1.8)';
+            points[randomPoint].style.background = 'var(--accent)';
+            
+            setTimeout(() => {
+                points[randomPoint].style.transform = 'translate(-50%, 50%) scale(1)';
+                points[randomPoint].style.background = 'var(--primary)';
+            }, 800);
+        }, 3000);
+    }
+
+    // Optimización para móviles - reducir animaciones
+    function optimizeForMobile() {
+        if (window.innerWidth <= 768) {
+            // Reducir la duración de las animaciones
+            document.documentElement.style.setProperty('--animate-duration', '0.5s');
+            
+            // Desactivar algunas animaciones pesadas
+            document.querySelectorAll('.animate__animated').forEach(el => {
+                if (el.classList.contains('animate__fadeInRight') || 
+                    el.classList.contains('animate__fadeInLeft')) {
+                    el.classList.remove('animate__fadeInRight', 'animate__fadeInLeft');
+                    el.classList.add('animate__fadeIn');
+                }
+            });
+        }
+    }
+
+    // Llamar a las funciones cuando el DOM esté cargado
+    document.addEventListener('DOMContentLoaded', () => {
+        createParticles();
+        optimizeForMobile();
+        
+        // Iniciar animación de gráfica cuando sea visible
+        const graphObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateGraph();
+                    graphObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        graphObserver.observe(document.querySelector('.graph-section'));
+    });
+
+    // Reoptimizar cuando cambie el tamaño de la ventana
+    window.addEventListener('resize', optimizeForMobile);
+    </script>
+</body>
+</html>
